@@ -1,0 +1,12 @@
+#animationContainer {
+  margin-top: 150px;
+  text-align: center;
+}
+
+#animationBoard {
+  border: 1px solid;
+}
+
+#score {
+  margin-top: 20px;
+}
