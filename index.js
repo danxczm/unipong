@@ -74,7 +74,7 @@ function collisionBlueDetection() {
 
 function collisionYellowDetection() {
   let b;
-  for (let c = 0; c < squaresColumnCount; c++) {
+  for (let c = 0; c < yellowSquares.length; c++) {
     for (let r = 0; r < squaresRowCount; r++) {
       b = yellowSquares[c][r];
 
@@ -96,8 +96,6 @@ function collisionYellowDetection() {
           } else {
             blueSquares[xIndex]?.push({ x: b.x, y: b.y, color: squareBlueColor });
           }
-          console.log(`blueSquares: `, blueSquares);
-          console.log(`yellowSquares: `, yellowSquares);
 
           yellowSquares[c].splice(r, 1);
           return;
