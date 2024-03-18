@@ -31,6 +31,28 @@ const squareYellowColor = '#FCDC2A';
 const squaresRowCount = 16;
 const squaresColumnCount = 8;
 
+function createMovingSquare(squareColor, squareInitialPositionX, squareInitialPositionY) {
+  ctx.beginPath();
+  ctx.rect(squareInitialPositionX, squareInitialPositionY, squareWidth, squareHeight);
+  ctx.fillStyle = squareColor;
+  ctx.fill();
+  ctx.closePath();
+}
+
+function randomMovingSquareDirection(squareXDirection, squareYDirection) {
+  if (Math.round(Math.random()) == 1) {
+    squareXDirection = 1;
+  } else {
+    squareXDirection = -1;
+  }
+
+  if (Math.round(Math.random()) == 1) {
+    squareYDirection = 1;
+  } else {
+    squareYDirection = -1;
+  }
+}
+
 function collisionBlueDetection() {
   for (let c = 0; c < squaresColumnCount; c++) {
     for (let r = 0; r < squaresRowCount; r++) {
@@ -73,94 +95,44 @@ function collisionYellowDetection() {
   }
 }
 
+function printSquaresInBoard(squaresArray) {
+  squaresArray.forEach(column => {
+    column.forEach(square => {
+      ctx.beginPath();
+      ctx.rect(square.x, square.y, squareWidth, squareHeight);
+      ctx.fillStyle = square.color;
+      ctx.fill();
+      ctx.closePath();
+    });
+  });
+}
+
 function createBlueSquare() {
-  ctx.beginPath();
-  ctx.rect(squareBlueX, squareBlueY, squareWidth, squareHeight);
-  ctx.fillStyle = squareBlueColor;
-  ctx.fill();
-  ctx.closePath();
+  createMovingSquare(squareBlueColor, squareBlueX, squareBlueY);
 
   squareBlueX += squareBlueXDirection;
   squareBlueY += squareBlueYDirection;
 }
 
 function createYellowSquare() {
-  ctx.beginPath();
-  ctx.rect(squareYellowX, squareYellowY, squareWidth, squareHeight);
-  ctx.fillStyle = squareYellowColor;
-  ctx.fill();
-  ctx.closePath();
+  createMovingSquare(squareYellowColor, squareYellowX, squareYellowY);
 
   squareYellowX += squareYellowXDirection;
   squareYellowY += squareYellowYDirection;
 }
 
 function drawBlueSquare() {
-  if (Math.round(Math.random()) == 1) {
-    squareBlueXDirection = 1;
-  } else {
-    squareBlueXDirection = -1;
-  }
-
-  if (Math.round(Math.random()) == 1) {
-    squareBlueYDirection = 1;
-  } else {
-    squareBlueYDirection = -1;
-  }
-
+  randomMovingSquareDirection(squareBlueXDirection, squareBlueYDirection);
   createBlueSquare();
 }
 
 function drawYellowSquare() {
-  if (Math.round(Math.random()) == 1) {
-    squareYellowXDirection = 1;
-  } else {
-    squareYellowXDirection = -1;
-  }
-
-  if (Math.round(Math.random()) == 1) {
-    squareYellowYDirection = 1;
-  } else {
-    squareYellowYDirection = -1;
-  }
-
+  randomMovingSquareDirection(squareYellowXDirection, squareYellowYDirection);
   createYellowSquare();
-}
-
-function drawBlueSquares() {
-  blueSquares.forEach(column => {
-    column.forEach(square => {
-      ctx.beginPath();
-      ctx.rect(square.x, square.y, squareWidth, squareHeight);
-      ctx.fillStyle = square.color;
-      ctx.fill();
-      ctx.closePath();
-    });
-  });
-}
-
-function drawYellowSquares() {
-  yellowSquares.forEach(column => {
-    column.forEach(square => {
-      ctx.beginPath();
-      ctx.rect(square.x, square.y, squareWidth, squareHeight);
-      ctx.fillStyle = square.color;
-      ctx.fill();
-      ctx.closePath();
-    });
-  });
 }
 
 function checkBordersCollision() {
   // blue square
-  if (squareBlueY <= 0) {
-    squareBlueYDirection *= -1;
-  }
-
-  if (squareBlueY >= y - 16) {
-    squareBlueYDirection *= -1;
-  }
-
   if (squareBlueX <= 0) {
     squareBlueXDirection *= -1;
   }
@@ -169,15 +141,15 @@ function checkBordersCollision() {
     squareBlueXDirection *= -1;
   }
 
+  if (squareBlueY <= 0) {
+    squareBlueYDirection *= -1;
+  }
+
+  if (squareBlueY >= y - 16) {
+    squareBlueYDirection *= -1;
+  }
+
   // yellow square
-  if (squareYellowY <= 0) {
-    squareYellowYDirection *= -1;
-  }
-
-  if (squareYellowY >= y - 16) {
-    squareYellowYDirection *= -1;
-  }
-
   if (squareYellowX <= 0) {
     squareYellowXDirection *= -1;
   }
@@ -185,14 +157,22 @@ function checkBordersCollision() {
   if (squareYellowX >= x - 16) {
     squareYellowXDirection *= -1;
   }
+
+  if (squareYellowY <= 0) {
+    squareYellowYDirection *= -1;
+  }
+
+  if (squareYellowY >= y - 16) {
+    squareYellowYDirection *= -1;
+  }
 }
 
 let intervalID;
 function nextFrame() {
   intervalID = setTimeout(() => {
     ctx.clearRect(0, 0, x, y);
-    drawBlueSquares();
-    drawYellowSquares();
+    printSquaresInBoard(blueSquares);
+    printSquaresInBoard(yellowSquares);
     createYellowSquare();
     createBlueSquare();
     checkBordersCollision();
