@@ -225,6 +225,5 @@ animationStart();
 
 /* 
 TODO Still have problems with collision, 
-idk why but when multiple squares are moving 
-it doesnt detect the color, but the data flow is okay
+feels like there is some problem with changing when collide
 */
