@@ -39,25 +39,13 @@ function createMovingSquare(squareColor, squareInitialPositionX, squareInitialPo
   ctx.closePath();
 }
 
-function randomMovingSquareDirection(squareXDirection, squareYDirection) {
-  if (Math.round(Math.random()) == 1) {
-    squareXDirection = 1;
-  } else {
-    squareXDirection = -1;
-  }
-
-  if (Math.round(Math.random()) == 1) {
-    squareYDirection = 1;
-  } else {
-    squareYDirection = -1;
-  }
-}
-
 function collisionBlueDetection() {
-  for (let c = 0; c < squaresColumnCount; c++) {
+  let b;
+  for (let c = 0; c < blueSquares.length; c++) {
     for (let r = 0; r < squaresRowCount; r++) {
-      let b = blueSquares[c][r];
-      if (b.color == squareBlueColor) {
+      b = blueSquares[c][r];
+
+      if (b?.color == squareBlueColor) {
         if (
           squareBlueX < b.x + squareWidth &&
           squareBlueX + squareWidth > b.x &&
@@ -65,8 +53,18 @@ function collisionBlueDetection() {
           squareBlueY + squareHeight > b.y
         ) {
           squareBlueXDirection = -squareBlueXDirection;
-          b.color = squareYellowColor;
 
+          let xIndex = yellowSquares.findIndex(column =>
+            column.some(squareData => squareData.x === b.x)
+          );
+
+          if (xIndex === -1) {
+            yellowSquares.push([{ x: b.x, y: b.y, color: squareYellowColor }]);
+          } else {
+            yellowSquares[xIndex]?.push({ x: b.x, y: b.y, color: squareYellowColor });
+          }
+
+          blueSquares[c].splice(r, 1);
           return;
         }
       }
@@ -75,9 +73,11 @@ function collisionBlueDetection() {
 }
 
 function collisionYellowDetection() {
+  let b;
   for (let c = 0; c < squaresColumnCount; c++) {
     for (let r = 0; r < squaresRowCount; r++) {
-      let b = yellowSquares[c][r];
+      b = yellowSquares[c][r];
+
       if (b?.color == squareYellowColor) {
         if (
           squareYellowX < b.x + squareWidth &&
@@ -86,8 +86,20 @@ function collisionYellowDetection() {
           squareYellowY + squareHeight > b.y
         ) {
           squareYellowXDirection = -squareYellowXDirection;
-          b.color = squareBlueColor;
 
+          let xIndex = blueSquares.findIndex(column =>
+            column.some(squareData => squareData.x === b.x)
+          );
+
+          if (xIndex === -1) {
+            blueSquares.push([{ x: b.x, y: b.y, color: squareBlueColor }]);
+          } else {
+            blueSquares[xIndex]?.push({ x: b.x, y: b.y, color: squareBlueColor });
+          }
+          console.log(`blueSquares: `, blueSquares);
+          console.log(`yellowSquares: `, yellowSquares);
+
+          yellowSquares[c].splice(r, 1);
           return;
         }
       }
@@ -122,12 +134,34 @@ function createYellowSquare() {
 }
 
 function drawBlueSquare() {
-  randomMovingSquareDirection(squareBlueXDirection, squareBlueYDirection);
+  if (Math.round(Math.random()) == 1) {
+    squareBlueXDirection = 1;
+  } else {
+    squareBlueXDirection = -1;
+  }
+
+  if (Math.round(Math.random()) == 1) {
+    squareBlueYDirection = 1;
+  } else {
+    squareBlueYDirection = -1;
+  }
+
   createBlueSquare();
 }
 
 function drawYellowSquare() {
-  randomMovingSquareDirection(squareYellowXDirection, squareYellowYDirection);
+  if (Math.round(Math.random()) == 1) {
+    squareYellowXDirection = 1;
+  } else {
+    squareYellowXDirection = -1;
+  }
+
+  if (Math.round(Math.random()) == 1) {
+    squareYellowYDirection = 1;
+  } else {
+    squareYellowYDirection = -1;
+  }
+
   createYellowSquare();
 }
 
@@ -191,16 +225,8 @@ function animationStart() {
 
 animationStart();
 
-/*
-
- челендж не простий, раніше з канвойю не працював але було весело, застряг на частині collision,
- та й не вистачило часу доробити, в цілому в подальшому я б опрацював кожний з массивів данних (blueSquares, yellowSquares) ось так:
-(в функціях collision___Detection змінна b повертає значення квадратику з яким зіштовхнувся квадрат який рухається тому...)
-
-- пройтись по всьому масиву знайти відповідність чи є в масиві масив з обєктом в якому Х дорівнює Х-у який в змінній b
-якщо ні то створюємо новий масив з значеннями в b та змінюємо колір відповідно до масиву який проходимо,
-якщо Х-и рівні то в цей обєкт додаємо данні з b та зновуж змінюємо колір
-
-- в цілому з приводу рахунку можна було б просто мінусувати плюсувати захаркодженні скори 128 Х 128
-
+/* 
+TODO Still have problems with collision, 
+idk why but when multiple squares are moving 
+it doesnt detect the color, but the data flow is okay
 */
