@@ -3,7 +3,8 @@ import { blueSquares } from './data/blueSquares.js';
 
 const animationBoard = document.getElementById('animationBoard');
 const ctx = animationBoard.getContext('2d');
-const score = document.querySelector('#score');
+const yellowScore = document.getElementById('yellowScore');
+const blueScore = document.getElementById('blueScore');
 
 let x = animationBoard.width;
 let y = animationBoard.height;
@@ -65,6 +66,10 @@ function collisionBlueDetection() {
           }
 
           blueSquares[c].splice(r, 1);
+
+          blueScore.textContent = parseInt(blueScore.textContent) - 1;
+          yellowScore.textContent = parseInt(yellowScore.textContent) + 1;
+
           return;
         }
       }
@@ -98,6 +103,10 @@ function collisionYellowDetection() {
           }
 
           yellowSquares[c].splice(r, 1);
+
+          yellowScore.textContent = parseInt(yellowScore.textContent) - 1;
+          blueScore.textContent = parseInt(blueScore.textContent) + 1;
+
           return;
         }
       }
