@@ -3,7 +3,8 @@ import { blueSquares } from './data/blueSquares.js';
 
 const animationBoard = document.getElementById('animationBoard');
 const ctx = animationBoard.getContext('2d');
-const score = document.querySelector('#score');
+const yellowScore = document.getElementById('yellowScore');
+const blueScore = document.getElementById('blueScore');
 
 let x = animationBoard.width;
 let y = animationBoard.height;
@@ -31,11 +32,21 @@ const squareYellowColor = '#FCDC2A';
 const squaresRowCount = 16;
 const squaresColumnCount = 8;
 
+function createMovingSquare(squareColor, squareInitialPositionX, squareInitialPositionY) {
+  ctx.beginPath();
+  ctx.rect(squareInitialPositionX, squareInitialPositionY, squareWidth, squareHeight);
+  ctx.fillStyle = squareColor;
+  ctx.fill();
+  ctx.closePath();
+}
+
 function collisionBlueDetection() {
-  for (let c = 0; c < squaresColumnCount; c++) {
+  let b;
+  for (let c = 0; c < blueSquares.length; c++) {
     for (let r = 0; r < squaresRowCount; r++) {
-      let b = blueSquares[c][r];
-      if (b.color == squareBlueColor) {
+      b = blueSquares[c][r];
+
+      if (b?.color == squareBlueColor) {
         if (
           squareBlueX < b.x + squareWidth &&
           squareBlueX + squareWidth > b.x &&
@@ -43,7 +54,21 @@ function collisionBlueDetection() {
           squareBlueY + squareHeight > b.y
         ) {
           squareBlueXDirection = -squareBlueXDirection;
-          b.color = squareYellowColor;
+
+          let xIndex = yellowSquares.findIndex(column =>
+            column.some(squareData => squareData.x === b.x)
+          );
+
+          if (xIndex === -1) {
+            yellowSquares.push([{ x: b.x, y: b.y, color: squareYellowColor }]);
+          } else {
+            yellowSquares[xIndex]?.push({ x: b.x, y: b.y, color: squareYellowColor });
+          }
+
+          blueSquares[c].splice(r, 1);
+
+          blueScore.textContent = parseInt(blueScore.textContent) - 1;
+          yellowScore.textContent = parseInt(yellowScore.textContent) + 1;
 
           return;
         }
@@ -53,9 +78,11 @@ function collisionBlueDetection() {
 }
 
 function collisionYellowDetection() {
-  for (let c = 0; c < squaresColumnCount; c++) {
+  let b;
+  for (let c = 0; c < yellowSquares.length; c++) {
     for (let r = 0; r < squaresRowCount; r++) {
-      let b = yellowSquares[c][r];
+      b = yellowSquares[c][r];
+
       if (b?.color == squareYellowColor) {
         if (
           squareYellowX < b.x + squareWidth &&
@@ -64,7 +91,21 @@ function collisionYellowDetection() {
           squareYellowY + squareHeight > b.y
         ) {
           squareYellowXDirection = -squareYellowXDirection;
-          b.color = squareBlueColor;
+
+          let xIndex = blueSquares.findIndex(column =>
+            column.some(squareData => squareData.x === b.x)
+          );
+
+          if (xIndex === -1) {
+            blueSquares.push([{ x: b.x, y: b.y, color: squareBlueColor }]);
+          } else {
+            blueSquares[xIndex]?.push({ x: b.x, y: b.y, color: squareBlueColor });
+          }
+
+          yellowSquares[c].splice(r, 1);
+
+          yellowScore.textContent = parseInt(yellowScore.textContent) - 1;
+          blueScore.textContent = parseInt(blueScore.textContent) + 1;
 
           return;
         }
@@ -73,23 +114,27 @@ function collisionYellowDetection() {
   }
 }
 
+function printSquaresInBoard(squaresArray) {
+  squaresArray.forEach(column => {
+    column.forEach(square => {
+      ctx.beginPath();
+      ctx.rect(square.x, square.y, squareWidth, squareHeight);
+      ctx.fillStyle = square.color;
+      ctx.fill();
+      ctx.closePath();
+    });
+  });
+}
+
 function createBlueSquare() {
-  ctx.beginPath();
-  ctx.rect(squareBlueX, squareBlueY, squareWidth, squareHeight);
-  ctx.fillStyle = squareBlueColor;
-  ctx.fill();
-  ctx.closePath();
+  createMovingSquare(squareBlueColor, squareBlueX, squareBlueY);
 
   squareBlueX += squareBlueXDirection;
   squareBlueY += squareBlueYDirection;
 }
 
 function createYellowSquare() {
-  ctx.beginPath();
-  ctx.rect(squareYellowX, squareYellowY, squareWidth, squareHeight);
-  ctx.fillStyle = squareYellowColor;
-  ctx.fill();
-  ctx.closePath();
+  createMovingSquare(squareYellowColor, squareYellowX, squareYellowY);
 
   squareYellowX += squareYellowXDirection;
   squareYellowY += squareYellowYDirection;
@@ -127,40 +172,8 @@ function drawYellowSquare() {
   createYellowSquare();
 }
 
-function drawBlueSquares() {
-  blueSquares.forEach(column => {
-    column.forEach(square => {
-      ctx.beginPath();
-      ctx.rect(square.x, square.y, squareWidth, squareHeight);
-      ctx.fillStyle = square.color;
-      ctx.fill();
-      ctx.closePath();
-    });
-  });
-}
-
-function drawYellowSquares() {
-  yellowSquares.forEach(column => {
-    column.forEach(square => {
-      ctx.beginPath();
-      ctx.rect(square.x, square.y, squareWidth, squareHeight);
-      ctx.fillStyle = square.color;
-      ctx.fill();
-      ctx.closePath();
-    });
-  });
-}
-
 function checkBordersCollision() {
   // blue square
-  if (squareBlueY <= 0) {
-    squareBlueYDirection *= -1;
-  }
-
-  if (squareBlueY >= y - 16) {
-    squareBlueYDirection *= -1;
-  }
-
   if (squareBlueX <= 0) {
     squareBlueXDirection *= -1;
   }
@@ -169,15 +182,15 @@ function checkBordersCollision() {
     squareBlueXDirection *= -1;
   }
 
+  if (squareBlueY <= 0) {
+    squareBlueYDirection *= -1;
+  }
+
+  if (squareBlueY >= y - 16) {
+    squareBlueYDirection *= -1;
+  }
+
   // yellow square
-  if (squareYellowY <= 0) {
-    squareYellowYDirection *= -1;
-  }
-
-  if (squareYellowY >= y - 16) {
-    squareYellowYDirection *= -1;
-  }
-
   if (squareYellowX <= 0) {
     squareYellowXDirection *= -1;
   }
@@ -185,14 +198,22 @@ function checkBordersCollision() {
   if (squareYellowX >= x - 16) {
     squareYellowXDirection *= -1;
   }
+
+  if (squareYellowY <= 0) {
+    squareYellowYDirection *= -1;
+  }
+
+  if (squareYellowY >= y - 16) {
+    squareYellowYDirection *= -1;
+  }
 }
 
 let intervalID;
 function nextFrame() {
   intervalID = setTimeout(() => {
     ctx.clearRect(0, 0, x, y);
-    drawBlueSquares();
-    drawYellowSquares();
+    printSquaresInBoard(blueSquares);
+    printSquaresInBoard(yellowSquares);
     createYellowSquare();
     createBlueSquare();
     checkBordersCollision();
@@ -211,16 +232,7 @@ function animationStart() {
 
 animationStart();
 
-/*
-
- челендж не простий, раніше з канвойю не працював але було весело, застряг на частині collision,
- та й не вистачило часу доробити, в цілому в подальшому я б опрацював кожний з массивів данних (blueSquares, yellowSquares) ось так:
-(в функціях collision___Detection змінна b повертає значення квадратику з яким зіштовхнувся квадрат який рухається тому...)
-
-- пройтись по всьому масиву знайти відповідність чи є в масиві масив з обєктом в якому Х дорівнює Х-у який в змінній b
-якщо ні то створюємо новий масив з значеннями в b та змінюємо колір відповідно до масиву який проходимо,
-якщо Х-и рівні то в цей обєкт додаємо данні з b та зновуж змінюємо колір
-
-- в цілому з приводу рахунку можна було б просто мінусувати плюсувати захаркодженні скори 128 Х 128
-
+/* 
+TODO Still have problems with collision, 
+feels like there is some problem with changing when collide
 */
